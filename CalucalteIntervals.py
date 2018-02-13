@@ -16,7 +16,7 @@ keys.append("End Calling - Dashboard API")                      #8
 
 class AppInsightLog:
     
-    def __init__(self,fileName):
+    def __init__(self,fileName,tsStartIndex,tsEndIndex):
         self.__content = []
         self.__file= fileName
         self.__timestamps = []
@@ -29,17 +29,19 @@ class AppInsightLog:
             for row in self.__content:
                 for key in keys:
                     if key in row[1]:
-                        timestamp = datetime.strptime(row[1][11:37],'%m/%d/%Y %I:%M:%S.%f %p')                       
+                        #timestamp = datetime.strptime(row[1][11:37],'%m/%d/%Y %I:%M:%S.%f %p')                       
+						timestamp = datetime.strptime(row[1][tsStartIndex:tsEndIndex],'%m/%d/%Y %I:%M:%S.%f %p')                       
                         self.__timestamps.append((key,timestamp))
         self.Content =self.__content
         self.TS =self.__timestamps
                
-    def Seggregate(self):
+    def Seggregate(self,size):
         count = 0
         index = 0
         while(index<len(self.__timestamps)-1):
             self.__batches[count] = []
-            if index+37 > len(self.__timestamps):
+            #if index+37 > len(self.__timestamps):
+			if index+ size> len(self.__timestamps):
                 max = len(self.__timestamps)-1
             else:
                 max = index+37
@@ -175,9 +177,12 @@ class AppInsightLog:
                 print(item[0].ljust(45) + ": " +str(item[1]) )
                 
 fileName = sys.argv[1]
-log = AppInsightLog(fileName)
+tsStartIndex = 11 #sys.argv[2]
+tsEndIndex = 37 #sys.argv[3]
+size = 37 ##sys.argv[4]
+log = AppInsightLog(fileName,tsStartIndex,tsEndIndex)
 print(fileName)
-log.Seggregate()
+log.Seggregate(size)
 log.CalcIntervalsWithLabels()
 log.WriteToFileWithLabels()
 log.CalcIntervalsInRows()
